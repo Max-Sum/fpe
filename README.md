@@ -1,5 +1,3 @@
-[![Godoc](https://godoc.org/github.com/capitalone/fpe?status.svg)](http://godoc.org/github.com/capitalone/fpe) [![Build Status](https://travis-ci.org/capitalone/fpe.svg?branch=master)](https://travis-ci.org/capitalone/fpe) [![Go Report Card](https://goreportcard.com/badge/github.com/capitalone/fpe)](https://goreportcard.com/report/github.com/capitalone/fpe) [![Sourcegraph](https://sourcegraph.com/github.com/capitalone/fpe/-/badge.svg)](https://sourcegraph.com/github.com/capitalone/fpe?badge) [![License](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
-
 # fpe - Format Preserving Encryption Implementation in Go
 
 An implementation of the NIST approved Format Preserving Encryption (FPE) FF1 and FF3 algorithms in Go.
@@ -18,13 +16,15 @@ There are some official [test vectors](http://csrc.nist.gov/groups/ST/toolkit/ex
 
 To run unit tests on this implementation with all test vectors from the NIST link above, run the built-in tests:
 
-  1. `go test -v github.com/capitalone/fpe/ff1`
-  2. `go test -v github.com/capitalone/fpe/ff3`
+  1. `go test -v github.com/Max-Sum/fpe/ff1`
+  1. `go test -v github.com/Max-Sum/fpe/ff1byte`
+  2. `go test -v github.com/Max-Sum/fpe/ff3`
 
 To run only benchmarks:
 
-  1. `go test -v -bench=. -run=NONE github.com/capitalone/fpe/ff1`
-  2. `go test -v -bench=. -run=NONE github.com/capitalone/fpe/ff3`
+  1. `go test -v -bench=. -run=NONE github.com/Max-Sum/fpe/ff1`
+  1. `go test -v -bench=. -run=NONE github.com/Max-Sum/fpe/ff1byte`
+  2. `go test -v -bench=. -run=NONE github.com/Max-Sum/fpe/ff3`
 
 ## Example Usage
 
@@ -36,7 +36,7 @@ package main
 import (
 	"encoding/hex"
 	"fmt"
-	"github.com/capitalone/fpe/ff1"
+	"github.com/Max-Sum/fpe/ff1byte"
 )
 
 // panic(err) is just used for example purposes.
@@ -54,27 +54,28 @@ func main() {
 
 	// Create a new FF1 cipher "object"
 	// 10 is the radix/base, and 8 is the tweak length.
-	FF1, err := ff1.NewCipher(10, 8, key, tweak)
+	FF1, err := ff1byte.NewCipher(8, key, tweak)
 	if err != nil {
 		panic(err)
 	}
 
-	original := "123456789"
+	original := []byte("123456789")
 
 	// Call the encryption function on an example SSN
-	ciphertext, err := FF1.Encrypt(original)
+	cipher, err := FF1.Encrypt(original)
 	if err != nil {
 		panic(err)
 	}
 
-	plaintext, err := FF1.Decrypt(ciphertext)
+	plain, err := FF1.Decrypt(cipher)
 	if err != nil {
 		panic(err)
 	}
 
 	fmt.Println("Original:", original)
-	fmt.Println("Ciphertext:", ciphertext)
-	fmt.Println("Plaintext:", plaintext)
+	fmt.Println("Ciphertext:", cipher)
+	fmt.Println("Plaintext in bytes:", plain)
+	fmt.Println("Plaintext:", string(plain))
 }
 ```
 
@@ -102,7 +103,7 @@ Further, while the test vectors all pass, the lack of a reference implementation
 
 As of Go 1.9, the standard library's [math/big](https://golang.org/pkg/math/big/) package did not support radices/bases higher than 36. As such, the initial release only supports base 36 strings, which can contain numeric digits 0-9 or lowercase alphabetic characters a-z.
 
-Base 62 support should be available come Go 1.10. See [this commit](https://github.com/golang/go/commit/51cfe6849a2b945c9a2bb9d271bf142f3bb99eca) and [this tracking issue](https://github.com/capitalone/fpe/issues/1).
+Base 62 support should be available come Go 1.10. See [this commit](https://github.com/golang/go/commit/51cfe6849a2b945c9a2bb9d271bf142f3bb99eca) and [this tracking issue](https://github.com/Max-Sum/fpe/issues/1).
 
 The only cryptographic primitive used for FF1 and FF3 is AES. This package uses Go's standard library's `crypto/aes` package for this. Note that while it technically uses AES-CBC mode, in practice it almost always is meant to act on a single-block with an IV of 0, which is effectively ECB mode. AES is also the only block cipher function that works at the moment, and the only allowed block cipher to be used for FF1/FF3, as per the spec.
 
@@ -126,4 +127,4 @@ We welcome your interest in Capital One’s Open Source Projects (the “Project
 
 [Link to Corporate CLA](https://docs.google.com/forms/d/e/1FAIpQLSeAbobIPLCVZD_ccgtMWBDAcN68oqbAJBQyDTSAQ1AkYuCp_g/viewform)
 
-This project adheres to the [Open Source Code of Conduct](https://developer.capitalone.com/single/code-of-conduct/). By participating, you are expected to honor this code.
+This project adheres to the [Open Source Code of Conduct](https://developer.Max-Sum.com/single/code-of-conduct/). By participating, you are expected to honor this code.

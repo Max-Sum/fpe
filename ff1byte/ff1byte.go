@@ -571,3 +571,8 @@ func (c Cipher) prf(input []byte) ([]byte, error) {
 	// Only return the last block (CBC-MAC)
 	return cipher[len(cipher)-blockSize:], nil
 }
+
+// BlockSize returns the cipher's block size
+func (c *Cipher) BlockSize() int {
+	return 1
+}
